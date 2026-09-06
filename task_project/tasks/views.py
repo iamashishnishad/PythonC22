@@ -31,6 +31,13 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    @override
+    def get_queryset(self):
+        user = cast(User, self.request.user)
+        if user.role == User.Role.ADMIN:
+            return Task.objects.all()
+        return Task.objects.filter(user=user)
+
     # Fetch By Username - GET username/<username>
     @action(detail=False, methods=["GET"], url_path=r"username/(?P<username>[\w.@+-]+)")
     def by_username(self, request: Request, username: str) -> Response:
